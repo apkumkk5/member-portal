@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block heading %}{{ member.first_name }} {{ member.last_name }}{% endblock %}
+{% block subheading %}Member {{ member.member_number }}{% endblock %}
+{% block content %}
+<p><a class="row" href="/">&larr; All members</a></p>
+<dl>
+  <dt>Email</dt><dd>{{ member.email }}</dd>
+  <dt>Phone</dt><dd>{{ member.phone or "—" }}</dd>
+  <dt>Address</dt><dd>{{ member.address_line1 }}<br>{{ member.city }}, {{ member.state }} {{ member.postal_code }}</dd>
+  <dt>Language preference</dt><dd><span class="pill">{{ languages.get(member.language_preference, member.language_preference) }}</span></dd>
+  <dt>Last updated</dt><dd>{{ member.updated_at }}</dd>
+</dl>
+<div class="actions">
+  <a href="/members/{{ member.id }}/edit">Edit information</a>
+  <a href="/members/{{ member.id }}/download?format=json">Download JSON</a>
+  <a href="/members/{{ member.id }}/download?format=csv">Download CSV</a>
+</div>
+{% endblock %}

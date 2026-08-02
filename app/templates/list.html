@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block subheading %}{{ members|length }} synthetic member records{% endblock %}
+{% block content %}
+<table>
+  <thead>
+    <tr><th>Member #</th><th>Name</th><th>City</th><th>Language</th></tr>
+  </thead>
+  <tbody>
+    {% for m in members %}
+    <tr>
+      <td>{{ m.member_number }}</td>
+      <td><a class="row" href="/members/{{ m.id }}">{{ m.first_name }} {{ m.last_name }}</a></td>
+      <td>{{ m.city }}, {{ m.state }}</td>
+      <td><span class="pill">{{ languages.get(m.language_preference, m.language_preference) }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

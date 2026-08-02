@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block heading %}Edit information{% endblock %}
+{% block subheading %}{{ member.first_name }} {{ member.last_name }} · {{ member.member_number }}{% endblock %}
+{% block content %}
+<p><a class="row" href="/members/{{ member.id }}">&larr; Cancel</a></p>
+<form method="post" action="/members/{{ member.id }}/edit">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" value="{{ member.email }}" required>
+
+  <label for="phone">Phone</label>
+  <input id="phone" name="phone" value="{{ member.phone or '' }}">
+
+  <label for="address_line1">Street address</label>
+  <input id="address_line1" name="address_line1" value="{{ member.address_line1 or '' }}">
+
+  <label for="city">City</label>
+  <input id="city" name="city" value="{{ member.city or '' }}">
+
+  <label for="state">State</label>
+  <input id="state" name="state" value="{{ member.state or '' }}">
+
+  <label for="postal_code">Postal code</label>
+  <input id="postal_code" name="postal_code" value="{{ member.postal_code or '' }}">
+
+  <label for="language_preference">Language preference</label>
+  <select id="language_preference" name="language_preference">
+    {% for code, label in languages.items() %}
+    <option value="{{ code }}" {% if code == member.language_preference %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit">Save changes</button>
+</form>
+{% endblock %}

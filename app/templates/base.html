@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Member Portal{% endblock %}</title>
+  <style>
+    :root { --ink:#1c1c1a; --muted:#6b6a65; --line:#dedcd4; --accent:#1d6e56; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; color: var(--ink);
+           max-width: 860px; margin: 0 auto; padding: 32px 20px; line-height: 1.6; }
+    header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 28px; }
+    header a { color: var(--accent); text-decoration: none; font-size: 14px; }
+    h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    th { font-weight: 600; color: var(--muted); font-size: 12px;
+         text-transform: uppercase; letter-spacing: .04em; }
+    tr:hover td { background: #faf9f6; }
+    a.row { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .pill { display: inline-block; background: #eef4f1; color: #14513f;
+            padding: 2px 10px; border-radius: 12px; font-size: 12px; }
+    dl { display: grid; grid-template-columns: 200px 1fr; gap: 10px 16px; margin: 24px 0; }
+    dt { color: var(--muted); font-size: 14px; }
+    dd { margin: 0; font-size: 15px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 16px 0 4px; }
+    input, select { width: 100%; padding: 9px 11px; font-size: 15px;
+                    border: 1px solid var(--line); border-radius: 6px;
+                    font-family: inherit; background: #fff; }
+    button { background: var(--accent); color: #fff; border: 0; padding: 10px 20px;
+             border-radius: 6px; font-size: 15px; cursor: pointer; margin-top: 24px; }
+    .actions { margin-top: 24px; display: flex; gap: 12px; align-items: center; }
+    .actions a { font-size: 14px; color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>{% block heading %}Member portal{% endblock %}</h1>
+    <p class="sub">{% block subheading %}{% endblock %}</p>
+  </header>
+  {% block content %}{% endblock %}
+</body>
+</html>
