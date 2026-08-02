@@ -1,0 +1,21 @@
+# Anything listed here is invisible to the Docker build.
+#
+# Two reasons this matters: smaller images build faster, and secrets or local
+# state can't accidentally end up baked into an artifact you might publish.
+
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local database. In a real system this would hold member PHI - it must never
+# be copied into an image.
+portal.db
+
+.git/
+.gitignore
+README.md
+tests/
+Dockerfile
+.dockerignore
