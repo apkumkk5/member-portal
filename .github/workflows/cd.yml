@@ -1,0 +1,61 @@
+# Continuous delivery: publish a container image on every merge to main.
+#
+# CI proves the code works. This produces the artifact you would actually
+# deploy. Keeping them separate matters - you want to build the thing once,
+# then promote that exact image through environments, rather than rebuilding
+# per environment and hoping the results match.
+
+name: Publish image
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    # GITHUB_TOKEN is read-only by default. Publishing needs write access to
+    # packages. Granting the minimum required is the habit worth keeping -
+    # a token that can do anything is a token worth stealing.
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generates tags and labels from git context. Every image gets tagged
+      # both with the commit SHA and with "latest".
+      #
+      # The SHA tag is the one that matters. "latest" is convenient and
+      # dangerous: it means something different tomorrow, so a rollback to
+      # "latest" is not a rollback. Real deploys pin the SHA.
+      - name: Work out tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
