@@ -40,4 +40,5 @@ EXPOSE 8000
 # 127.0.0.1 inside a container means "only reachable from inside this
 # container" - the port mapping would appear to work and nothing would
 # respond. This catches people out constantly.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+
