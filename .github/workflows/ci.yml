@@ -1,0 +1,65 @@
+# Continuous integration for the member portal.
+#
+# Runs on every push and every pull request. The point is that this happens on
+# a clean machine every time - no leftover database, no hand-built virtualenv,
+# no environment variable someone set months ago and forgot.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Run against several Python versions at once. Each entry below spawns its
+    # own independent machine, so all three run in parallel rather than in
+    # sequence. This is how you find out that your code works on 3.11 but
+    # breaks on 3.13 - before a user does.
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Seed the database
+        run: python -m app.seed
+
+      - name: Run tests
+        run: pytest -v
+
+  # Building the image in CI proves the Dockerfile actually works. A Dockerfile
+  # that has never been built is just a text file with opinions in it.
+  docker:
+    runs-on: ubuntu-latest
+    needs: test          # only runs if every test job passed
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -t member-portal:${{ github.sha }} .
+
+      - name: Start a container and check it responds
+        run: |
+          docker run -d -p 8000:8000 --name portal member-portal:${{ github.sha }}
+          sleep 5
+          curl --fail http://localhost:8000/health
+          docker stop portal
