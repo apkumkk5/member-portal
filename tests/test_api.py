@@ -7,6 +7,7 @@ would break a deploy: health, listing, retrieval, update, and download.
 import pytest
 from fastapi.testclient import TestClient
 
+from app.db import get_all_members, get_member, update_member
 from app.main import app
 from app.seed import seed
 
@@ -75,3 +76,47 @@ def test_download_csv(client):
     response = client.get("/members/1/download?format=csv")
     assert response.status_code == 200
     assert "member_number" in response.text
+
+
+def test_seed_resets_ids_from_one():
+    """A reset must clear the AUTOINCREMENT counter, not just the rows.
+
+    Without clearing sqlite_sequence, re-seeding produces IDs 26-30 instead
+    of 1-5, and every test referencing member 1 breaks. This guards the fix.
+    """
+    seed(count=5)
+
+    ids = [m["id"] for m in get_all_members()]
+    assert sorted(ids) == [1, 2, 3, 4, 5]
+
+
+def test_language_preference_persists_across_reads():
+    """An update must be durable, not just reflected in the redirect."""
+    client = TestClient(app)
+    client.post(
+        "/members/2/edit",
+        data={
+            "email": "persist@example.com",
+            "phone": "555-0199",
+            "address_line1": "9 Persist Ave",
+            "city": "Trenton",
+            "state": "NJ",
+            "postal_code": "08608",
+            "language_preference": "vi",
+        },
+        follow_redirects=False,
+    )
+
+    member = get_member(2)
+    assert member["language_preference"] == "vi"
+    assert member["email"] == "persist@example.com"
+
+
+def test_member_number_cannot_be_changed():
+    """The update allowlist must reject fields members shouldn't control."""
+    before = get_member(3)["member_number"]
+    update_member(3, {"member_number": "M999999", "city": "Edison"})
+    after = get_member(3)
+
+    assert after["member_number"] == before
+    assert after["city"] == "Edison"
