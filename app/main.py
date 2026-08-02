@@ -21,12 +21,11 @@ from fastapi.templating import Jinja2Templates
 
 from app.db import LANGUAGES, get_all_members, get_member, init_db, update_member
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Runs once on startup, before the app accepts traffic.
 
-    Code after `yield` runs on shutdown — the place for closing connection
+    Code after `yield` runs on shutdown - the place for closing connection
     pools or flushing buffers. Replaces the deprecated @app.on_event hooks.
     """
     init_db()
@@ -125,3 +124,6 @@ def download(member_id: int, format: str = "json"):
 
     return Response(
         json.dumps(member, indent=2),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}.json"'},
+    )

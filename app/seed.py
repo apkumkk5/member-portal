@@ -31,6 +31,7 @@ def seed(count: int = 25, reset: bool = True):
     with get_connection() as conn:
         if reset:
             conn.execute("DELETE FROM members")
+            conn.execute("DELETE FROM sqlite_sequence WHERE name = 'members'")
 
         for i in range(1, count + 1):
             first = random.choice(FIRST_NAMES)
@@ -61,3 +62,4 @@ def seed(count: int = 25, reset: bool = True):
 
 if __name__ == "__main__":
     seed()
+
