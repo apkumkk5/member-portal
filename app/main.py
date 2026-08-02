@@ -12,6 +12,7 @@ Route map:
 import csv
 import io
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
@@ -20,13 +21,20 @@ from fastapi.templating import Jinja2Templates
 
 from app.db import LANGUAGES, get_all_members, get_member, init_db, update_member
 
-app = FastAPI(title="Member Portal")
-templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Runs once on startup, before the app accepts traffic.
 
-@app.on_event("startup")
-def startup():
+    Code after `yield` runs on shutdown — the place for closing connection
+    pools or flushing buffers. Replaces the deprecated @app.on_event hooks.
+    """
     init_db()
+    yield
+
+
+app = FastAPI(title="Member Portal", lifespan=lifespan)
+templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 
 @app.get("/health")
@@ -117,6 +125,3 @@ def download(member_id: int, format: str = "json"):
 
     return Response(
         json.dumps(member, indent=2),
-        media_type="application/json",
-        headers={"Content-Disposition": f'attachment; filename="{filename}.json"'},
-    )
